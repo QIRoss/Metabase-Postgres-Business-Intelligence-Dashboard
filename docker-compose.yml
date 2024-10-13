@@ -1,0 +1,41 @@
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: your_user
+      POSTGRES_PASSWORD: your_password
+      POSTGRES_DB: your_db_name
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  fastapi:
+    build:
+      context: ./fastapi_app
+    container_name: fastapi_app
+    environment:
+      DATABASE_URL: postgresql://your_user:your_password@postgres:5432/your_db_name
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+  metabase:
+    image: metabase/metabase
+    container_name: metabase
+    ports:
+      - "3000:3000"
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: your_db_name
+      MB_DB_PORT: 5432
+      MB_DB_USER: your_user
+      MB_DB_PASS: your_password
+      MB_DB_HOST: postgres
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
